@@ -14,7 +14,7 @@ services:
       retries: 5
 
   catalogue:
-    image: catalogue:latest
+    image: weaveworksdemos/catalogue:0.3.5
     hostname: catalogue
     restart: always
     cap_drop:
@@ -192,8 +192,8 @@ services:
       - MONGO_HOST=user-db:27017
 
   front-end:
-    build: .
-    image: sock-shop/front-end:latest
+#    build: .
+    image: front-end:latest
     hostname: front-end
     restart: always
     cap_drop:
