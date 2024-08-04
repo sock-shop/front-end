@@ -1,0 +1,75 @@
+name: Build and Test Front-End Image in Sock-Shop Ecosystem
+
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'helpers/**'
+      - 'public/**'
+
+jobs:
+  build-and-test:
+    name: Build and Test Front-End Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+
+      - name: Run Docker Compose
+        id: docker-compose
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: "docker-compose.yml"
+        continue-on-error: false  # Allows the workflow to continue even if this step fails
+
+      - name: Wait for 2 Minutes
+        if: steps.docker-compose.outcome == 'success'
+        run: sleep 120
+
+      - name: Get Logs from Load-Test Container
+        id: get-logs
+        if: steps.docker-compose.outcome == 'success'
+        run: |
+          docker logs user-sim > user-sim.log || true  # Capture logs and handle errors gracefully
+
+      - name: Post Logs as PR Comment
+        if: steps.docker-compose.outcome == 'success'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let logOutput;
+            try {
+              logOutput = fs.readFileSync('user-sim.log', 'utf8');
+            } catch (error) {
+              logOutput = 'Unable to read logs.';
+            }
+            const output = `#### Docker logs user-sim 📖\`${{ steps.docker-compose.outcome }}\`
+            <details><summary>Show Logs</summary>
+
+            \`\`\`\n
+            ${logOutput}
+            \`\`\`
+
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Docker Logs Status
+        if: steps.get-logs.outcome == 'failure'
+        run: exit 1

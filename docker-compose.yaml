@@ -192,7 +192,7 @@ services:
       - MONGO_HOST=user-db:27017
 
   front-end:
-#    build: .
+    build: .
     image: front-end:latest
     hostname: front-end
     restart: always
