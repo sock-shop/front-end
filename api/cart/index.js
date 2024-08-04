@@ -57,7 +57,6 @@
         return next(error);
       }
       console.log('Item deleted with status: ' + response.statusCode);
-      console.log(':::');
       helpers.respondStatus(res, response.statusCode);
     });
   });
