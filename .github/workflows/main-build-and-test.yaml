@@ -23,11 +23,24 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v4
 
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Run Docker Compose
         id: docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: "./docker-compose.yaml"
+        env:
+          CATALOGUE_IMAGE: ${{ steps.login-ecr.outputs.registry }}/catalogue:v0.1.1 # this should be change if the tag change to use recent image
         continue-on-error: false
 
       - name: Wait for Container Termination
