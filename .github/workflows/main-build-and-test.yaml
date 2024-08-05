@@ -2,10 +2,6 @@ name: Build and Test Front-End Image in Sock-Shop Ecosystem
 
 on:
   pull_request:
-    paths:
-      - 'api/**'
-      - 'helpers/**'
-      - 'public/**'
 
 jobs:
   build-and-test:
