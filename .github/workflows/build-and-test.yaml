@@ -33,19 +33,24 @@ jobs:
           compose-file: "./docker-compose.yaml"
         continue-on-error: false  # Allows the workflow to continue even if this step fails
 
-      - name: Wait for 2 Minutes
+      - name: Wait for Container Termination
         if: steps.docker-compose.outcome == 'success'
-        run: sleep 120
+        run: |
+          while [ "$(docker inspect -f '{{.State.Running}}' front-end-user-sim-1)" == "true" ]; do
+            echo "Waiting for front-end-user-sim-1 to terminate..."
+            sleep 10
+          done
+          echo "Container front-end-user-sim-1 has terminated."
 
       - name: Get Logs from Load-Test Container
         id: get-logs
         if: steps.docker-compose.outcome == 'success'
         run: |
-          docker logs -f front-end-user-sim-1 &>  user-sim.log || true  # Capture logs and handle errors gracefully
+          docker logs -f front-end-user-sim-1 &> user-sim.log || true  # Capture logs and handle errors gracefully
 
       - name: Post Logs as PR Comment
         if: steps.docker-compose.outcome == 'success'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
