@@ -41,7 +41,7 @@ jobs:
         id: get-logs
         if: steps.docker-compose.outcome == 'success'
         run: |
-          docker logs user-sim > user-sim.log || true  # Capture logs and handle errors gracefully
+          docker logs -f front-end-user-sim-1 &>  user-sim.log || true  # Capture logs and handle errors gracefully
 
       - name: Post Logs as PR Comment
         if: steps.docker-compose.outcome == 'success'
