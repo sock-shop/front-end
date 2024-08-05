@@ -34,6 +34,7 @@
         return next(error);
       }
       console.log('User cart deleted with status: ' + response.statusCode);
+      console.log(':::');
       helpers.respondStatus(res, response.statusCode);
     });
   });
