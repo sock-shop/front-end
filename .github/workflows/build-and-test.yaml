@@ -14,6 +14,10 @@ jobs:
     permissions:
       contents: write
       issues: write
+    env:
+      MYSQL_ROOT_PASSWORD: fake_password
+      MYSQL_DATABASE: socksdb
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
     defaults:
       run:
         shell: bash
